@@ -19,16 +19,110 @@ import csv, json, math, pandas as pd, requests, unittest, uuid
 # ------ Create your classes here \/ \/ \/ ------
 
 # Box class declaration below here
-    
+class Box:
+    def __init__(self, length, width):
+        self.__length = length
+        self.__width = width
+
+    def get_length(self):
+        return self.__length
+
+    def get_width(self):
+        return self.__width
+
+    def render(self):
+        for x in range(0, self.__length):
+            for y in range(0, self.__width):
+                print('*')
+
+    def invert(self):
+        self.__length, self.__width = (self.__width, self.__length)
+
+    def get_area(self):
+        return self.__length * self.__width
+
+    def get_perimeter(self):
+        return (2 * self.__length) + (2 * self.__width)
+
+    def double(self):
+        self.__width = 2 * self.__width
+        self.__length = 2 * self.__length
+        return self
+
+    def __eq__(self, box):
+        if self.__length == box.get_length() and self.__width == box.get_width():
+            return True
+        return False
+
+    def print_dim(self):
+        print(f'Length: {self.__length} / Width: {self.__width}')
+
+    def get_dim(self):
+        return (self.__length, self.__width)
+
+    def combine(self, box):
+        self.__length = self.__length + box.get_length()
+        self.__width = self.__width + box.get_width()
+        return self
+
+    def get_hypot(self):
+        return math.sqrt(self.__width ** 2 + self.__length ** 2)
 
 # MangoDB class declaration below here
-
     
 
 # ------ Create your classes here /\ /\ /\ ------
 
+class MangoDB():
+    def __init__(self):
+        self.data = {
+            'default':{
+                'version': 1.0,
+                'db': 'mangodb',
+                'uuid': uuid.uuid4(),
+            }
+        }
+    
+    def display_all_collections(self):
+        for main_key in self.data.keys():
+            print(f'collection: {main_key}')
+            for key, item in self.data[main_key]:
+                print(f'    {key} {item}')
 
+    def add_collection(self, collection_name):
+        self.data[collection_name] = {}
 
+    def update_collection(self, collection_name, updates: dict):
+        self.data[collection_name].update(updates)
+
+    def remove_collection(self, collection_name):
+        self.data.popitem(collection_name)
+
+    def list_collections(self):
+        print(self.get_collection_names())
+
+    def get_collection_size(self, collection_name):
+        return len(self.data[collection_name].items())
+
+    def to_json(self, collection_name):
+        return_string = '{'
+        for key, item in self.data[collection_name].items():
+            return_string = return_string + f'"{key}": {item}, '
+
+        return_string = return_string[:-2] + '}'
+        return return_string
+
+    def wipe(self):
+        self.data = {
+            'default':{
+                'version': 1.0,
+                'db': 'mangodb',
+                'uuid': uuid.uuid4(),
+            }
+        }
+
+    def get_collection_names(self):
+        return self.data.keys()
 
 
 def exercise01():
@@ -64,8 +158,26 @@ def exercise01():
 '''
 
     # ------ Place code below here \/ \/ \/ ------
+    box1 = Box(5, 10)
+    box2 = Box(3, 4)
+    box3 = Box(5, 10)
 
+    for x in [box1, box2, box3]:
+        x.print_dim()
 
+    print(box1 == box2)
+    print(box1 == box3)
+
+    box1.combine(box3)
+
+    box2.double()
+
+    box1.combine(box2)
+
+    for x in [box1, box2, box3]:
+        x.get_dim()
+
+    box2.get_hypot()
 
     return box1, box2, box3
 
@@ -74,7 +186,9 @@ def exercise01():
 
 def exercise02():
     '''
-    Create a class called MangoDB. The MangoDB class wraps a dictionary of dictionaries. At the the root level, each key/value will be called a collection, similar to the terminology used by MongoDB, an inferior version of MangoDB ;) A collection is a series of 2nd level key/value paries. The root value key is the name of the collection and the value is another dictionary containing arbitrary data for that collection.
+    Create a class called MangoDB. The MangoDB class wraps a dictionary of dictionaries. At the the root level, each key/value will be called a collection, 
+    similar to the terminology used by MongoDB, an inferior version of MangoDB ;) A collection is a series of 2nd level key/value paries. 
+    The root value key is the name of the collection and the value is another dictionary containing arbitrary data for that collection.
 
     For example:
 
@@ -92,7 +206,8 @@ def exercise02():
             }
         }
     
-    The above is a representation of a dictionary of dictionaries. Default and temperatures are dictionaries or collections. The default collection has a series of key/value pairs that make up the collection. The MangoDB class should create only the default collection, as shown, on instantiation including a randomly generated uuid using the uuid4() method and have the following methods:
+    The above is a representation of a dictionary of dictionaries. Default and temperatures are dictionaries or collections. The default collection has a series of key/value pairs that make up the collection.
+     The MangoDB class should create only the default collection, as shown, on instantiation including a randomly generated uuid using the uuid4() method and have the following methods:
         - display_all_collections() which iterates through every collection and prints to screen each collection names and the collection's content underneath and may look something like:
             collection: default
                 version 1.0
@@ -101,6 +216,7 @@ def exercise02():
             collection: temperatures
                 1 50
                 2 100 
+                3 120
         - add_collection(collection_name) allows the caller to add a new collection by providing a name. The collection will be empty but will have a name.
         - update_collection(collection_name,updates) allows the caller to insert new items into a collection i.e. 
                 db = MangoDB()
@@ -132,6 +248,15 @@ def exercise02():
 
     # ------ Place code below here \/ \/ \/ ------
 
+    mango = MangoDB()
+    mango.add_collection('testscores')
+    mango.update_collection('testscores', {id+1:x for id, x in enumerate(test_scores)})
+    mango.get_collection_size('testscores')
+    mango.list_collections()
+    print(mango.to_json('default'))
+    mango.wipe()
+    print(mango.to_json('default'))
+
     # ------ Place code above here /\ /\ /\ ------
 
 
@@ -147,7 +272,10 @@ def exercise03():
 
     # ------ Place code below here \/ \/ \/ ------
 
-
+    with open('avocado.csv', newline='') as csv_file:
+        reader = csv.reader(csv_file, delimiter=',')
+        for row in reader:
+            print(row)
     # ------ Place code above here /\ /\ /\ ------
 
 class TestAssignment3(unittest.TestCase):
